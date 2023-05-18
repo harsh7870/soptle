@@ -1,25 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { createContext, useEffect, useState } from "react";
+import CustomerRegistration from "./components/CustomerRegistration";
+import FlightBooking from "./components/FlightBooking";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import AdminDashboard from "./components/AdminDashboard";
 
-function App() {
+export const UserContext = createContext();
+
+const App = () => {
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    let data = JSON.parse(localStorage.getItem("userInfo"));
+    setUserInfo(data);
+  }, []);
+
+  const handleUserInfo = (value) => {
+    setUserInfo(value);
+  };
+
+  const handleLogout = () => {
+    localStorage.clear("userInfo");
+    setUserInfo(null);
+  };
+
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: userInfo ? <FlightBooking /> : <CustomerRegistration />,
+    },
+    {
+      path: "/admin",
+      element: <AdminDashboard />,
+    },
+  ]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UserContext.Provider value={{ handleUserInfo, userInfo, handleLogout }}>
+      <div>
+        <RouterProvider router={router} />
+      </div>
+    </UserContext.Provider>
   );
-}
+};
 
 export default App;
